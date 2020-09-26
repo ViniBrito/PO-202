@@ -21,15 +21,24 @@ ma = int(req[6][2]) # maximo de alunos por turma
 np = int(req[7][2]) + int(req[8][2]) # numero de professores por turma
 
 # h = numero de escolas, w = numero de anos
-w = 3
-h = 4
+
+# puxando quantidade de escolas
+cursor.execute(""" SELECT * FROM escola; """)
+w = 0
+for linha in cursor.fetchall():
+	w+=1
+
+#puxando quantidade de anos ativos
+cursor.execute(""" SELECT * FROM serie; """)
+h = 0
+for linha in cursor.fetchall():
+	h+=linha[2]
+
 z = int(int(C/(cp*np))/(w*h))
 
 mm = [[0 for x in range(w)] for y in range(h)] 
 M = [[[0 for k in range(z)] for x in range(w)] for y in range(h)] 
 
-print(w, h, z)
-print(B(19,z,h)[0])
 # puxando tabela de inscritos (vulgo matriz mm)
 cursor.execute(""" SELECT * FROM formulario_inscricao; """)
 
@@ -44,7 +53,6 @@ t = []
 for linha in cursor.fetchall(): 
     t.append((linha[len(linha)-1] - 2, linha[len(linha)-2] -1, ord(linha[1][len(linha[1]) - 1]) - ord('A')))
 
-# print(t)
 # puxando tabela aluno (usaremos para obter M, junto da tabela turma)
 cursor.execute(""" SELECT * FROM aluno; """)
 for linha in cursor.fetchall(): 
@@ -79,7 +87,7 @@ for j in range(w):
 
         for d in range(z):
             SS += M[i][j][d]
-        print(i, j, S, SS)
+        #print(i, j, S, SS)
         prob += (S <= SS)
 
 for i in range(tv):
@@ -97,7 +105,8 @@ for i in range(tv):
             else:
                 prob += (x[j] >= x[i])
 '''
-soma = 0
+
+'''soma = 0
 for j in range(w):
     for i in range(h):
         for k in range(z):
@@ -113,7 +122,7 @@ for j in range(w):
         soma += mm[i][j]
         print(mm[i][j], end=" ")
     print("")
-print(soma)
+print(soma)'''
 
 resultado = prob.solve()
 # assert resultado == pulp.LpStatusOptimal
@@ -125,4 +134,4 @@ for var in y:
     S+=var.value()
     print('valores de y: {} = {:1.0f}'.format(var.name, var.value()))
 
-print(S)
+print("Total de alunos em 2021 =",S)
